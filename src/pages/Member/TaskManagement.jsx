@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { updateTask } from "../Task/TaskUpdate";
-import {deleteTask} from '../Task/TaskDelete';
+import { updateTask } from "../../apis/Task/Tasks";
+import { deleteTask } from "../../apis/Task/Tasks";
 const TaskManagement = () => {
   const [tasks, setTasks] = useState([
     {
@@ -50,28 +50,28 @@ const TaskManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        if(currentTask){
-            await updateTask(currentTask.id, formData);
-            const updated = tasks.map(task=>task.id === currentTask.id?{...formData, id:task.id}: task);
-            setTasks(updated);
-
-        }else{
-            const newTask = {...formData, id: Date.now()};
-            setTasks([...tasks,newTask]);
-        }
-        setIsModalOpen(false);
-        setFormData({
-          title: "",
-          description: "",
-          status: "Todo",
-          assignee: "",
-          dueDate: "",
-          priority: "Medium",
-        });
-        setCurrentTask(null);
+      if (currentTask) {
+        await updateTask(currentTask.id, formData);
+        const updated = tasks.map((task) =>
+          task.id === currentTask.id ? { ...formData, id: task.id } : task
+        );
+        setTasks(updated);
+      } else {
+        const newTask = { ...formData, id: Date.now() };
+        setTasks([...tasks, newTask]);
+      }
+      setIsModalOpen(false);
+      setFormData({
+        title: "",
+        description: "",
+        status: "Todo",
+        assignee: "",
+        dueDate: "",
+        priority: "Medium",
+      });
+      setCurrentTask(null);
     } catch (error) {
-       console.error("Error submitting task: ",err);
-       
+      console.error("Error submitting task: ", err);
     }
   };
 
@@ -81,12 +81,12 @@ const TaskManagement = () => {
     setIsModalOpen(true);
   };
 
-const handleDelete = async (id) => {
+  const handleDelete = async (id) => {
     try {
-        await deleteTask(id);
-        setTasks(tasks.filter(task => task.id !== id));
+      await deleteTask(id);
+      setTasks(tasks.filter((task) => task.id !== id));
     } catch (error) {
-        console.error("Error delleting task", error);
+      console.error("Error delleting task", error);
     }
   };
 
