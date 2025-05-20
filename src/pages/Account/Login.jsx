@@ -7,6 +7,14 @@ const Login = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Thêm logic xác thực đăng nhập ở đây
+    // Sau khi đăng nhập thành công, chuyển hướng đến trang quản lý thành viên
+    window.location.href = '/members';
+  };
+
   return (
     <>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-red-200 to-gray-900 relative overflow-hidden font-sans">
@@ -28,7 +36,7 @@ const Login = () => {
             Login
           </h1>
         </div>
-        <form className="space-y-4 sm:space-y-6">
+        <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
           <div>
             <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="email">
               Email
