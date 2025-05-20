@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-const MemberManagement = () => {
+const TaskManagement = () => {
   const [tasks, setTasks] = useState([
     {
       id: 1,
-      title: "Thiết kế giao diện",
+      title: "nhom a",
       description: "Thiết kế UI/UX cho trang chủ",
       status: "In Progress",
       assignee: "Nguyễn Văn A",
@@ -117,9 +117,7 @@ const MemberManagement = () => {
     <div className="h-full">
       <div className="bg-white/80 backdrop-blur-md rounded-xl shadow-xl p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-red-500">
-            Quản lý danh sách nhóm
-          </h1>
+          <h1 className="text-3xl font-bold text-red-500">Danh sách nhóm</h1>
           <button
             onClick={() => {
               setCurrentTask(null);
@@ -342,4 +340,4 @@ const MemberManagement = () => {
   );
 };
 
-export default MemberManagement;
+export default TaskManagement;
