@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
+import { updateTask } from "../Task/TaskUpdate";
+import {deleteTask} from '../Task/TaskDelete';
 const TaskManagement = () => {
   const [tasks, setTasks] = useState([
     {
@@ -46,27 +47,32 @@ const TaskManagement = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (currentTask) {
-      setTasks(
-        tasks.map((task) =>
-          task.id === currentTask.id ? { ...formData, id: task.id } : task
-        )
-      );
-    } else {
-      setTasks([...tasks, { ...formData, id: Date.now() }]);
+    try {
+        if(currentTask){
+            await updateTask(currentTask.id, formData);
+            const updated = tasks.map(task=>task.id === currentTask.id?{...formData, id:task.id}: task);
+            setTasks(updated);
+
+        }else{
+            const newTask = {...formData, id: Date.now()};
+            setTasks([...tasks,newTask]);
+        }
+        setIsModalOpen(false);
+        setFormData({
+          title: "",
+          description: "",
+          status: "Todo",
+          assignee: "",
+          dueDate: "",
+          priority: "Medium",
+        });
+        setCurrentTask(null);
+    } catch (error) {
+       console.error("Error submitting task: ",err);
+       
     }
-    setIsModalOpen(false);
-    setFormData({
-      title: "",
-      description: "",
-      status: "Todo",
-      assignee: "",
-      dueDate: "",
-      priority: "Medium",
-    });
-    setCurrentTask(null);
   };
 
   const handleEdit = (task) => {
@@ -75,8 +81,13 @@ const TaskManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+const handleDelete = async (id) => {
+    try {
+        await deleteTask(id);
+        setTasks(tasks.filter(task => task.id !== id));
+    } catch (error) {
+        console.error("Error delleting task", error);
+    }
   };
 
   const filteredTasks = tasks.filter((task) => {

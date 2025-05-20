@@ -1,12 +1,12 @@
-import React from 'react'
 
+import axios from "axios";
 
-function TaskUpdate() {
-  return (
-    <div>
-
-    </div>
-  )
-}
-
-export default TaskUpdate
+export const updateTask = async (id, updatedData) => {
+  try {
+    const response = await axios.put(`/api/tasks/${id}`, updaedData);
+    return response.data;t
+  } catch (error) {
+    console.error("Failed to update task:", error);
+    throw error;
+  }
+};
