@@ -19,7 +19,7 @@ function App() {
         {/* Các route được bảo vệ bởi Layout */}
         <Route element={<Layout />}>
           <Route path="/groups" element={<GroupManagement />} />
-          <Route path="/members" element={<MemberManagement />} />
+          <Route path="/groups/:groupId/members" element={<MemberManagement />} />
           <Route path="/task" element={<TaskManagement />} />
           <Route path="/tasks/:id" element={<TaskDetail />} />
 
