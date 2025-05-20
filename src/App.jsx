@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom'
 import Login from './pages/Account/Login'
 import Register from './pages/Account/Register'
 import MemberManagement from './pages/Member/MemberManagement'
+import TaskDetail from './pages/Task/TaskDetail'
 import Layout from './pages/Layout'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         {/* Các route được bảo vệ bởi Layout */}
         <Route element={<Layout />}>
           <Route path="/members" element={<MemberManagement />} />
+          <Route path="/tasks/:id" element={<TaskDetail />} />
           {/* Thêm các route khác ở đây */}
         </Route>
       </Routes>
