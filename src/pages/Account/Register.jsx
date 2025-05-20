@@ -30,15 +30,15 @@ const Register = () => {
         </div>
         <form className="space-y-4 sm:space-y-6 md:space-y-8">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="account">
-                Account
+          <div>
+              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="email">
+                Email
               </label>
               <input
-                id="account"
-                type="text"
+                id="email"
+                type="email"
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                placeholder="Enter your account"
+                placeholder="Enter your email"
                 required
               />
             </div>
@@ -78,55 +78,6 @@ const Register = () => {
                 required
               />
             </div>
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="dateOfBirth">
-                Date of Birth
-              </label>
-              <input
-                id="dateOfBirth"
-                type="date"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="gender">
-                Gender
-              </label>
-              <select
-                id="gender"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                required
-              >
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="identityCard">
-                Identity Card
-              </label>
-              <input
-                id="identityCard"
-                type="text"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                placeholder="Enter your identity card number"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="email">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
             <div className="sm:col-span-2">
               <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="phoneNumber">
                 Phone Number
@@ -139,18 +90,6 @@ const Register = () => {
                 required
               />
             </div>
-          </div>
-          <div>
-            <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="address">
-              Address
-            </label>
-            <textarea
-              id="address"
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-              placeholder="Enter your address"
-              rows="3"
-              required
-            ></textarea>
           </div>
           <button
             type="submit"
