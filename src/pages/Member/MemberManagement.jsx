@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+// Giải thích: Để đảm bảo các nội dung dài trong bảng chỉ hiển thị trên một dòng (không bị xuống dòng), 
+// ta sẽ thêm các class Tailwind như 'whitespace-nowrap', 'overflow-hidden', 'text-ellipsis', 'max-w-[200px]' cho các ô cần thiết.
+// Có thể điều chỉnh max-w tùy ý cho phù hợp giao diện.
+
 const Dashboard = () => {
   const [tasks, setTasks] = useState([
     {
@@ -166,37 +170,37 @@ const Dashboard = () => {
           <table className="w-full">
             <thead>
               <tr className="bg-red-100">
-                <th className="px-4 py-2 text-left">Tiêu đề</th>
-                <th className="px-4 py-2 text-left">Trạng thái</th>
-                <th className="px-4 py-2 text-left">Người phụ trách</th>
-                <th className="px-4 py-2 text-left">Độ ưu tiên</th>
-                <th className="px-4 py-2 text-left">Ngày bắt đầu</th>
-                <th className="px-4 py-2 text-left">Hạn hoàn thành</th>
-                <th className="px-4 py-2 text-left">Thao tác</th>
+                <th className="px-4 py-2 text-left whitespace-nowrap">Tiêu đề</th>
+                <th className="px-4 py-2 text-left whitespace-nowrap">Trạng thái</th>
+                <th className="px-4 py-2 text-left whitespace-nowrap">Người phụ trách</th>
+                <th className="px-4 py-2 text-left whitespace-nowrap">Độ ưu tiên</th>
+                <th className="px-4 py-2 text-left whitespace-nowrap">Ngày bắt đầu</th>
+                <th className="px-4 py-2 text-left whitespace-nowrap">Hạn hoàn thành</th>
+                <th className="px-4 py-2 text-left whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredTasks.map((task) => (
                 <tr key={task.id} className="border-b border-red-100">
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
                     <Link to={`/tasks/${task.id}`} className="text-blue-500 hover:underline">
                       {task.title}
                     </Link>
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">
                     <span className={`px-2 py-1 rounded-full text-sm ${getStatusColor(task.status)}`}>
                       {task.status}
                     </span>
                   </td>
-                  <td className="px-4 py-2">{task.assignee}</td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-[160px]">{task.assignee}</td>
+                  <td className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">
                     <span className={`px-2 py-1 rounded-full text-sm ${getPriorityColor(task.priority)}`}>
                       {task.priority}
                     </span>
                   </td>
-                  <td className="px-4 py-2">{task.startDate}</td>
-                  <td className="px-4 py-2">{task.dueDate}</td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">{task.startDate}</td>
+                  <td className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">{task.dueDate}</td>
+                  <td className="px-4 py-2 whitespace-nowrap">
                     <button
                       onClick={() => handleEdit(task)}
                       className="text-blue-500 hover:text-blue-700 mr-2"

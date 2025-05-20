@@ -9,6 +9,12 @@ const allMembers = [
   { id: 4, name: "Phạm Thị D" },
 ];
 
+// Thêm hàm helper để giới hạn text
+const truncateText = (text, maxLength = 30) => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + '...';
+};
+
 const GroupManagement = () => {
   // Thêm state memberSearch
   const [memberSearch, setMemberSearch] = useState("");
@@ -170,38 +176,39 @@ const GroupManagement = () => {
                 filteredGroups.map((group) => (
                   <tr key={group.id} className="border-b border-red-100">
                     <td className="px-4 py-2">
-                      {/* Khi ấn vào tên nhóm sẽ chuyển sang trang thành viên nhóm */}
                       <span
                         className="text-blue-500 hover:underline cursor-pointer"
                         onClick={() => handleGroupNameClick(group.id)}
                       >
-                        {group.nameGroup}
+                        {truncateText(group.nameGroup)}
                       </span>
                     </td>
                     <td className="px-4 py-2">{group.startDate}</td>
                     <td className="px-4 py-2">
-                      {/* Hiển thị tên các thành viên của nhóm, chỉ hiện tối đa 2 người, sau đó là dấu 3 chấm */}
-                      {group.memberIds && group.memberIds.length > 0 ? (
-                        <>
-                          {group.memberIds
-                            .slice(0, 2)
-                            .map(
-                              (id) =>
-                                allMembers.find((m) => m.id === id)?.name ||
-                                "Không rõ"
-                            )
-                            .join(", ")}
-                          {group.memberIds.length > 2 && "..."}
-                        </>
-                      ) : (
-                        "Chưa có"
-                      )}
+                      <div className="max-w-[200px] truncate" title={
+                        group.memberIds && group.memberIds.length > 0
+                          ? group.memberIds
+                              .map(id => allMembers.find(m => m.id === id)?.name || "Không rõ")
+                              .join(", ")
+                          : "Chưa có"
+                      }>
+                        {group.memberIds && group.memberIds.length > 0 ? (
+                          <>
+                            {group.memberIds
+                              .slice(0, 2)
+                              .map(id => allMembers.find(m => m.id === id)?.name || "Không rõ")
+                              .join(", ")}
+                            {group.memberIds.length > 2 && "..."}
+                          </>
+                        ) : (
+                          "Chưa có"
+                        )}
+                      </div>
                     </td>
-                    <td className="px-4 py-2">
-                      {/* Hiển thị số lượng thành viên trong nhóm */}
+                    <td className="px-4 py-2 text-center">
                       {group.memberIds ? group.memberIds.length : 0}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 whitespace-nowrap">
                       <button
                         onClick={() => handleEdit(group)}
                         className="text-blue-500 hover:text-blue-700 mr-2"
