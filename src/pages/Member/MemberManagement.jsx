@@ -9,6 +9,7 @@ const Dashboard = () => {
       description: 'Thiết kế UI/UX cho trang chủ',
       status: 'In Progress',
       assignee: 'Nguyễn Văn A',
+      startDate: '2024-03-10',
       dueDate: '2024-03-20',
       priority: 'High'
     },
@@ -18,6 +19,7 @@ const Dashboard = () => {
       description: 'Xây dựng REST API cho module user',
       status: 'Todo',
       assignee: 'Trần Thị B',
+      startDate: '2024-03-10',
       dueDate: '2024-03-25',
       priority: 'Medium'
     }
@@ -30,6 +32,7 @@ const Dashboard = () => {
     description: '',
     status: 'Todo',
     assignee: '',
+    startDate: '',
     dueDate: '',
     priority: 'Medium'
   });
@@ -49,7 +52,7 @@ const Dashboard = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (currentTask) {
-      setTasks(tasks.map(task => 
+      setTasks(tasks.map(task =>
         task.id === currentTask.id ? { ...formData, id: task.id } : task
       ));
     } else {
@@ -61,6 +64,7 @@ const Dashboard = () => {
       description: '',
       status: 'Todo',
       assignee: '',
+      startDate: '',
       dueDate: '',
       priority: 'Medium'
     });
@@ -80,6 +84,7 @@ const Dashboard = () => {
   const filteredTasks = tasks.filter(task => {
     if (filters.status !== 'All' && task.status !== filters.status) return false;
     if (filters.assignee !== 'All' && task.assignee !== filters.assignee) return false;
+    if (filters.searchName && !task.assignee.toLowerCase().includes(filters.searchName.toLowerCase())) return false;
     return true;
   });
 
@@ -114,6 +119,7 @@ const Dashboard = () => {
                 description: '',
                 status: 'Todo',
                 assignee: '',
+                startDate: '',
                 dueDate: '',
                 priority: 'Medium'
               });
@@ -146,6 +152,13 @@ const Dashboard = () => {
             <option value="Nguyễn Văn A">Nguyễn Văn A</option>
             <option value="Trần Thị B">Trần Thị B</option>
           </select>
+          <input
+            type="text"
+            placeholder="Tìm theo tên người phụ trách"
+            value={filters.searchName || ''}
+            onChange={(e) => setFilters({ ...filters, searchName: e.target.value })}
+            className="px-3 py-2 rounded-lg border border-red-200 w-64"
+          />
         </div>
 
         {/* Bảng công việc */}
@@ -157,6 +170,7 @@ const Dashboard = () => {
                 <th className="px-4 py-2 text-left">Trạng thái</th>
                 <th className="px-4 py-2 text-left">Người phụ trách</th>
                 <th className="px-4 py-2 text-left">Độ ưu tiên</th>
+                <th className="px-4 py-2 text-left">Ngày bắt đầu</th>
                 <th className="px-4 py-2 text-left">Hạn hoàn thành</th>
                 <th className="px-4 py-2 text-left">Thao tác</th>
               </tr>
@@ -180,6 +194,7 @@ const Dashboard = () => {
                       {task.priority}
                     </span>
                   </td>
+                  <td className="px-4 py-2">{task.startDate}</td>
                   <td className="px-4 py-2">{task.dueDate}</td>
                   <td className="px-4 py-2">
                     <button
@@ -204,8 +219,9 @@ const Dashboard = () => {
 
       {/* Modal thêm/sửa công việc */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-[800px] h-[650px] overflow-y-auto">
+
             <h2 className="text-2xl font-bold text-red-500 mb-4">
               {currentTask ? 'Sửa công việc' : 'Thêm công việc mới'}
             </h2>
@@ -269,6 +285,16 @@ const Dashboard = () => {
                   <option value="Medium">Trung bình</option>
                   <option value="Low">Thấp</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-red-700 font-semibold mb-2">Ngày bắt đầu</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 rounded-lg border border-red-200"
+                />
               </div>
               <div>
                 <label className="block text-red-700 font-semibold mb-2">Hạn hoàn thành</label>
