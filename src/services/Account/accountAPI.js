@@ -8,14 +8,14 @@ const accountAPI = {
       const response = await axiosInstance.post(`${endpoint}/login`, data);
       console.log("api login:", response);
       const da = response.data;
-      const { token, email, fullname, phone } = da;
+      const { token, email, fullname, phone, _id } = da;
 
       // Lưu thông tin người dùng vào localStorage
-      localStorage.setItem("token", token);
-      // localStorage.setItem("email", JSON.stringify(user.email));
-      localStorage.setItem("email", JSON.stringify(email));
-      localStorage.setItem("fullname", JSON.stringify(fullname));
-      localStorage.setItem("phone", JSON.stringify(phone));
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userId", response.data.data._id);
+      localStorage.setItem("email", response.data.data.email);
+      localStorage.setItem("fullname", response.data.data.fullname);
+      localStorage.setItem("phone", response.data.data.phone);
       return response;
     } catch (error) {
       console.error("Login error:", error);
@@ -39,20 +39,11 @@ const accountAPI = {
   },
 
   logout: async () => {
-    try {
-      const response = await axiosInstance.post(`${endpoint}/logout`);
-
-      // Xoá localStorage
-      localStorage.removeItem("token");
-      localStorage.removeItem("email");
-      localStorage.removeItem("fullname");
-      localStorage.removeItem("phone");
-
-      return response.data;
-    } catch (error) {
-      console.error("Logout error:", error);
-      throw error.response?.data || { message: "Logout failed" };
-    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+    localStorage.removeItem("fullname");
+    localStorage.removeItem("phone");
+    localStorage.removeItem("userId");
   },
 };
 

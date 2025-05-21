@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import groupsAPI from "../../services/Groups/groupsAPI";
-import membersAPI from "../../services/Members/membersAPI";
 
-// Helper để giới hạn độ dài text
 const truncateText = (text, maxLength = 30) => {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + "...";
+  return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
 };
 
 const GroupManagement = () => {
@@ -19,26 +16,48 @@ const GroupManagement = () => {
   const [currentGroup, setCurrentGroup] = useState(null);
   const [formData, setFormData] = useState({
     nameGroup: "",
-    startDate: "",
     memberIds: [],
   });
   const [formError, setFormError] = useState("");
 
   const navigate = useNavigate();
 
+  // Fetch nhóm của user
   useEffect(() => {
     const fetchGroups = async () => {
-      const groups = await groupsAPI.getAllGroups();
-      setGroups(groups);
+      try {
+        const userId = localStorage.getItem("userId");
+        if (!userId) return;
+        const response = await groupsAPI.getAllGroupsByMemberId(userId);
+        const rawGroups = response.data?.data || [];
+
+        const mappedGroups = rawGroups.map((group) => ({
+          id: group._id || group.id,
+          nameGroup: group.name,
+          memberIds: group.members?.map((m) => m.id || m._id) || [],
+          memberCount: group.members?.length || 0,
+        }));
+
+        setGroups(mappedGroups);
+      } catch (error) {
+        console.error("Error fetching groups:", error);
+      }
     };
+
     fetchGroups();
   }, []);
 
+  // Fetch tất cả thành viên
   useEffect(() => {
     const fetchMembers = async () => {
-      const members = await membersAPI.getAllMembers();
-      setMembers(members);
+      try {
+        const res = await groupsAPI.getAllMembers();
+        setMembers(res.data?.data || []);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      }
     };
+
     fetchMembers();
   }, []);
 
@@ -46,53 +65,96 @@ const GroupManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleMemberChange = (e) => {
-    const value = parseInt(e.target.value);
-    let newMemberIds = [...formData.memberIds];
+  const handleMemberChange = async (e) => {
+    const memberId = e.target.value;
+    let updatedIds = [...formData.memberIds];
+
     if (e.target.checked) {
-      newMemberIds.push(value);
+      updatedIds.push(memberId);
     } else {
-      newMemberIds = newMemberIds.filter((id) => id !== value);
+      updatedIds = updatedIds.filter((id) => id !== memberId);
+
+      // Nếu là chế độ sửa, xóa thành viên ngay lập tức khỏi nhóm
+      if (currentGroup) {
+        try {
+          await groupsAPI.deleteMemberIdFromGroup(currentGroup.id, memberId);
+        } catch (error) {
+          console.error("Error removing member:", error);
+        }
+      }
     }
-    setFormData({ ...formData, memberIds: newMemberIds });
+
+    setFormData({ ...formData, memberIds: updatedIds });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.memberIds || formData.memberIds.length < 2) {
+
+    if (formData.memberIds.length < 2) {
       setFormError("Vui lòng chọn ít nhất 2 thành viên cho nhóm.");
       return;
     }
-    setFormError("");
 
-    if (currentGroup) {
-      setGroups(
-        groups.map((group) =>
-          group.id === currentGroup.id ? { ...formData, id: group.id } : group
-        )
-      );
-    } else {
-      setGroups([...groups, { ...formData, id: Date.now() }]);
+    try {
+      if (currentGroup) {
+        // Chế độ cập nhật nhóm
+        const existingIds = currentGroup.memberIds || [];
+        const newIds = formData.memberIds.filter((id) => !existingIds.includes(id));
+
+        await Promise.all(
+          newIds.map((id) => groupsAPI.addMemberIdToGroup(currentGroup.id, id))
+        );
+
+        const updatedGroups = groups.map((g) =>
+          g.id === currentGroup.id
+            ? { ...g, nameGroup: formData.nameGroup, memberIds: formData.memberIds }
+            : g
+        );
+
+        setGroups(updatedGroups);
+      } else {
+        // Tạo nhóm mới
+        const res = await groupsAPI.createGroup({
+          nameGroup: formData.nameGroup,
+        });
+
+        const newGroupId = res.data?.id || res.data?._id;
+
+        await Promise.all(
+          formData.memberIds.map((id) => groupsAPI.addMemberIdToGroup(newGroupId, id))
+        );
+
+        setGroups([
+          ...groups,
+          { id: newGroupId, nameGroup: formData.nameGroup, memberIds: formData.memberIds, memberCount: formData.memberIds.length },
+        ]);
+      }
+
+      setIsModalOpen(false);
+      setFormData({ nameGroup: "", memberIds: [] });
+      setCurrentGroup(null);
+      setFormError("");
+    } catch (error) {
+      console.error("Error submitting group:", error);
     }
-
-    setIsModalOpen(false);
-    setFormData({ nameGroup: "", startDate: "", memberIds: [] });
-    setCurrentGroup(null);
   };
 
   const handleEdit = (group) => {
     setCurrentGroup(group);
     setFormData({
       nameGroup: group.nameGroup,
-      startDate: group.startDate,
       memberIds: group.memberIds || [],
     });
-    setFormError("");
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setGroups(groups.filter((group) => group.id !== id));
+  const handleDelete = async (groupId) => {
+    try {
+      await groupsAPI.deleteGroup(groupId);
+      setGroups(groups.filter((g) => g.id !== groupId));
+    } catch (error) {
+      console.error("Error deleting group:", error);
+    }
   };
 
   const handleGroupNameClick = (groupId) => {
@@ -100,7 +162,7 @@ const GroupManagement = () => {
   };
 
   const filteredGroups = groups.filter((group) =>
-    group.nameGroup?.toLowerCase().trim().includes(groupSearch.toLowerCase().trim())
+    group.nameGroup?.toLowerCase().includes(groupSearch.trim().toLowerCase())
   );
 
   return (
@@ -110,18 +172,18 @@ const GroupManagement = () => {
           <h1 className="text-3xl font-bold text-red-500">Quản lý danh sách nhóm</h1>
           <button
             onClick={() => {
-              setCurrentGroup(null);
-              setFormData({ nameGroup: "", startDate: "", memberIds: [] });
-              setFormError("");
               setIsModalOpen(true);
+              setCurrentGroup(null);
+              setFormData({ nameGroup: "", memberIds: [] });
+              setFormError("");
             }}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
           >
             Tạo nhóm
           </button>
         </div>
 
-        <div className="mb-4 flex items-center">
+        <div className="mb-4">
           <input
             type="text"
             placeholder="Tìm kiếm theo tên nhóm..."
@@ -136,9 +198,8 @@ const GroupManagement = () => {
             <thead>
               <tr className="bg-red-100">
                 <th className="px-4 py-2 text-left">Tên nhóm</th>
-                <th className="px-4 py-2 text-left">Ngày bắt đầu</th>
+                <th className="px-4 py-2 text-center">Số lượng</th>
                 <th className="px-4 py-2 text-left">Thành viên</th>
-                <th className="px-4 py-2 text-left">Số lượng thành viên</th>
                 <th className="px-4 py-2 text-left">Thao tác</th>
               </tr>
             </thead>
@@ -154,45 +215,25 @@ const GroupManagement = () => {
                         {truncateText(group.nameGroup)}
                       </span>
                     </td>
-                    <td className="px-4 py-2">{group.startDate}</td>
+                    <td className="px-4 py-2 text-center">{group.memberIds?.length || 0}</td>
                     <td className="px-4 py-2">
-                      <div
-                        className="max-w-[200px] truncate"
-                        title={
-                          group.memberIds?.length > 0
-                            ? group.memberIds
-                                .map((id) => members.find((m) => m.id === id)?.name || "Không rõ")
-                                .join(", ")
-                            : "Chưa có"
-                        }
-                      >
-                        {group.memberIds?.length > 0 ? (
-                          <>
-                            {group.memberIds
-                              .slice(0, 2)
-                              .map((id) => members.find((m) => m.id === id)?.name || "Không rõ")
-                              .join(", ")}
-                            {group.memberIds.length > 2 && "..."}
-                          </>
-                        ) : (
-                          "Chưa có"
-                        )}
+                      <div className="max-w-[200px] truncate" title={
+                        group.memberIds
+                          .map((id) => members.find((m) => m.id === id)?.name || "Không rõ")
+                          .join(", ")
+                      }>
+                        {group.memberIds
+                          .slice(0, 2)
+                          .map((id) => members.find((m) => m.id === id)?.name || "Không rõ")
+                          .join(", ")}
+                        {group.memberIds?.length > 2 && "..."}
                       </div>
                     </td>
-                    <td className="px-4 py-2 text-center">
-                      {group.memberIds ? group.memberIds.length : 0}
-                    </td>
                     <td className="px-4 py-2 whitespace-nowrap">
-                      <button
-                        onClick={() => handleEdit(group)}
-                        className="text-blue-500 hover:text-blue-700 mr-2"
-                      >
+                      <button onClick={() => handleEdit(group)} className="text-blue-500 hover:text-blue-700 mr-2">
                         Sửa
                       </button>
-                      <button
-                        onClick={() => handleDelete(group.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
+                      <button onClick={() => handleDelete(group.id)} className="text-red-500 hover:text-red-700">
                         Xóa
                       </button>
                     </td>
@@ -200,7 +241,7 @@ const GroupManagement = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="text-center py-4 text-gray-500">
+                  <td colSpan="4" className="text-center py-4 text-gray-500">
                     Không tìm thấy nhóm nào phù hợp.
                   </td>
                 </tr>
@@ -210,7 +251,7 @@ const GroupManagement = () => {
         </div>
       </div>
 
-      {/* Modal tạo/sửa nhóm */}
+      {/* MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
@@ -230,16 +271,6 @@ const GroupManagement = () => {
                 />
               </div>
               <div>
-                <label className="block text-red-700 font-semibold mb-2">Ngày bắt đầu</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 rounded-lg border border-red-200"
-                />
-              </div>
-              <div>
                 <label className="block text-red-700 font-semibold mb-2">
                   Thành viên nhóm <span className="text-red-500">*</span>
                 </label>
@@ -250,47 +281,33 @@ const GroupManagement = () => {
                   onChange={(e) => setMemberSearch(e.target.value)}
                   className="w-full px-3 py-2 mb-2 rounded-lg border border-red-200"
                 />
-                {memberSearch.trim() !== "" && (
-                  <div className="max-h-32 overflow-y-auto border border-red-200 rounded-lg p-2 bg-red-50">
-                    {members
-                      .filter((member) =>
-                        member.name.toLowerCase().includes(memberSearch.toLowerCase())
-                      )
-                      .map((member) => (
-                        <div key={member.id} className="flex items-center mb-1">
-                          <input
-                            type="checkbox"
-                            id={`member-${member.id}`}
-                            value={member.id}
-                            checked={formData.memberIds.includes(member.id)}
-                            onChange={handleMemberChange}
-                            className="mr-2"
-                          />
-                          <label htmlFor={`member-${member.id}`}>{member.name}</label>
-                        </div>
-                      ))}
-                    {members.filter((member) =>
-                      member.name.toLowerCase().includes(memberSearch.toLowerCase())
-                    ).length === 0 && (
-                      <div className="text-gray-500 text-sm">Không tìm thấy thành viên nào.</div>
-                    )}
-                  </div>
-                )}
-                <p className="text-xs text-gray-500 mt-1">(Chọn ít nhất 2 thành viên)</p>
+                <div className="max-h-40 overflow-y-auto border border-red-200 rounded-lg p-2 bg-red-50">
+                  {members
+                    .filter((m) => m.name.toLowerCase().includes(memberSearch.toLowerCase()))
+                    .map((member) => (
+                      <div key={member.id} className="flex items-center mb-1">
+                        <input
+                          type="checkbox"
+                          id={`member-${member.id}`}
+                          value={member.id}
+                          checked={formData.memberIds.includes(member.id)}
+                          onChange={handleMemberChange}
+                          className="mr-2"
+                        />
+                        <label htmlFor={`member-${member.id}`}>{member.name}</label>
+                      </div>
+                    ))}
+                  {!members.some((m) =>
+                    m.name.toLowerCase().includes(memberSearch.toLowerCase())
+                  ) && <p className="text-sm text-gray-500">Không tìm thấy thành viên nào.</p>}
+                </div>
                 {formError && <p className="text-red-500 text-sm mt-1">{formError}</p>}
               </div>
               <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                >
+                <button type="button" onClick={() => setIsModalOpen(false)} className="text-gray-600 hover:text-gray-800">
                   Hủy
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                >
+                <button type="submit" className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
                   {currentGroup ? "Cập nhật" : "Thêm mới"}
                 </button>
               </div>

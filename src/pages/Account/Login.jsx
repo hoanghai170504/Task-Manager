@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Footer from "../../components/Footer/Footer";
 import accountAPI from "../../services/Account/accountAPI";
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -15,14 +18,28 @@ const Login = () => {
   });
 
   const handleLogin = async () => {
-    const response = await accountAPI.login(data);
-    console.log(data);
-    if (response.status === 200) {
-      window.location.href = "/groups";
-    } else {
-      alert("Login failed");
+    try {
+      const response = await accountAPI.login(data);
+      if (response.status === 200) {
+        await Swal.fire({
+          title: 'Đăng nhập thành công',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
+        navigate('/groups');
+      }
+    } catch (error) {
+      Swal.fire({
+        title: 'Đăng nhập thất bại',
+        text: error?.message || 'Vui lòng thử lại',
+        icon: 'error',
+        showCancelButton: true,
+        cancelButtonText: 'Thử lại',
+        cancelButtonColor: '#d33',
+      });
     }
   };
+  
   
 
   const handleSubmit = (e) => {

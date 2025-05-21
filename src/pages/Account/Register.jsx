@@ -3,8 +3,11 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'
 import Footer from '../../components/Footer/Footer'
 import accountAPI from '../../services/Account/accountAPI';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -21,7 +24,13 @@ const Register = () => {
     e.preventDefault(); // Ngăn form reload
   
     if (data.password !== data.confirmPassword) {
-      alert("Passwords do not match");
+      Swal.fire({
+        title: 'Mật khẩu không khớp',
+        icon: 'error',
+        showCancelButton: true,
+        cancelButtonText: 'Thử lại',
+        cancelButtonColor: '#d33',
+      });
       return;
     }
   
@@ -34,11 +43,21 @@ const Register = () => {
   
     try {
       const response = await accountAPI.register(payload);
-      alert("Register successfully");
-      window.location.href = "/login";
+      Swal.fire({
+        title: 'Đăng ký thành công',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+      navigate('/login');
     } catch (err) {
       console.error("Registration error:", err);
-      alert(err.message || "Registration failed");
+      Swal.fire({
+        title: 'Đăng ký thất bại',
+        icon: 'error',
+        showCancelButton: true,
+        cancelButtonText: 'Thử lại',
+        cancelButtonColor: '#d33',
+      });
     }
   };
   
