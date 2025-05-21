@@ -16,6 +16,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     const response = await accountAPI.login(data);
+    console.log(data);
     if (response.status === 200) {
       window.location.href = "/groups";
     } else {
