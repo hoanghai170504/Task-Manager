@@ -1,18 +1,32 @@
 import React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Footer from "../../components/Footer/Footer";
+import accountAPI from "../../services/Account/accountAPI";
 
 const Login = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const [data, setData] = useState({
+    email: "",
+    password: ""
+  });
+
+  const handleLogin = async () => {
+    const response = await accountAPI.login(data);
+    if (response.status === 200) {
+      window.location.href = "/groups";
+    } else {
+      alert("Login failed");
+    }
+  };
+  
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Thêm logic xác thực đăng nhập ở đây
-    // Sau khi đăng nhập thành công, chuyển hướng đến trang quản lý thành viên
-    window.location.href = "/groups";
+    handleLogin();
   };
 
   return (
@@ -56,6 +70,8 @@ const Login = () => {
                 placeholder="Enter your email"
                 autoComplete="email"
                 required
+                value={data.email}
+                onChange={(e) => setData({ ...data, email: e.target.value })}
               />
             </div>
             <div>
@@ -68,15 +84,18 @@ const Login = () => {
               <input
                 id="password"
                 type="password"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
+                className="w-full px-3 py-2 sm:p  x-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Enter your password"
                 autoComplete="current-password"
                 required
+                value={data.password}
+                onChange={(e) => setData({ ...data, password: e.target.value })}
               />
             </div>
             <button
               type="submit"
               className="w-full py-2 sm:py-3 mt-2 bg-gradient-to-r from-red-400 to-red-600 text-white font-bold rounded-lg shadow-md hover:scale-105 hover:from-red-500 hover:to-red-700 transition-all duration-200 border border-red-300 font-sans tracking-wide"
+              onClick={handleLogin}
             >
               Login
             </button>
