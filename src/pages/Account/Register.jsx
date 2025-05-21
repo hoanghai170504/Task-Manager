@@ -1,12 +1,48 @@
 import React from 'react'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'
 import Footer from '../../components/Footer/Footer'
+import accountAPI from '../../services/Account/accountAPI';
 
 const Register = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const [data, setData] = useState({
+    email: "",
+    password: "",
+    fullname: "",
+    phone: "",
+    confirmPassword: ""
+  });
+
+  const handleRegister = async (e) => {
+    e.preventDefault(); // Ngăn form reload
+  
+    if (data.password !== data.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+  
+    const payload = {
+      email: data.email.trim(),
+      password: data.password.trim(),
+      fullname: data.fullname.trim(),
+      phone: data.phone.trim()
+    };
+  
+    try {
+      const response = await accountAPI.register(payload);
+      alert("Register successfully");
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Registration error:", err);
+      alert(err.message || "Registration failed");
+    }
+  };
+  
+  
   return (
     <>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-red-200 to-gray-900 relative overflow-hidden font-sans">
@@ -40,6 +76,8 @@ const Register = () => {
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Enter your email"
                 required
+                value={data.email}
+                onChange={(e) => setData({ ...data, email: e.target.value })}
               />
             </div>
             <div>
@@ -47,11 +85,13 @@ const Register = () => {
                 Full Name
               </label>
               <input
-                id="fullName"
+                id="fullname"
                 type="text"
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Enter your full name"
                 required
+                value={data.fullname}
+                onChange={(e) => setData({ ...data, fullname: e.target.value })}
               />
             </div>
             <div>
@@ -64,6 +104,8 @@ const Register = () => {
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Enter your password"
                 required
+                value={data.password}
+                onChange={(e) => setData({ ...data, password: e.target.value })}
               />
             </div>
             <div>
@@ -76,6 +118,8 @@ const Register = () => {
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Confirm your password"
                 required
+                value={data.confirmPassword}
+                onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
               />
             </div>
             <div className="sm:col-span-2">
@@ -88,12 +132,15 @@ const Register = () => {
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Enter your phone number"
                 required
+                value={data.phone}
+                onChange={(e) => setData({ ...data, phone: e.target.value })}
               />
             </div>
           </div>
           <button
             type="submit"
             className="w-full py-2 sm:py-3 mt-2 bg-gradient-to-r from-red-400 to-red-600 text-white font-bold rounded-lg shadow-md hover:scale-105 hover:from-red-500 hover:to-red-700 transition-all duration-200 border border-red-300 font-sans tracking-wide"
+            onClick={handleRegister}
           >
             Register
           </button>
