@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { updateTask } from "../../apis/Task/Tasks";
-import { deleteTask } from "../../apis/Task/Tasks";
 const TaskManagement = () => {
   const [tasks, setTasks] = useState([
     {
