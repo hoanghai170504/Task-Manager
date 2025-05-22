@@ -1,12 +1,67 @@
 import React from 'react'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'
 import Footer from '../../components/Footer/Footer'
+import accountAPI from '../../services/Account/accountAPI';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const [data, setData] = useState({
+    email: "",
+    password: "",
+    fullname: "",
+    phone: "",
+    confirmPassword: ""
+  });
+
+  const handleRegister = async (e) => {
+    e.preventDefault(); // Ngăn form reload
+  
+    if (data.password !== data.confirmPassword) {
+      Swal.fire({
+        title: 'Mật khẩu không khớp',
+        icon: 'error',
+        showCancelButton: true,
+        cancelButtonText: 'Thử lại',
+        cancelButtonColor: '#d33',
+      });
+      return;
+    }
+  
+    const payload = {
+      email: data.email.trim(),
+      password: data.password.trim(),
+      fullname: data.fullname.trim(),
+      phone: data.phone.trim()
+    };
+  
+    try {
+      const response = await accountAPI.register(payload);
+      Swal.fire({
+        title: 'Đăng ký thành công',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+      navigate('/login');
+    } catch (err) {
+      console.error("Registration error:", err);
+      Swal.fire({
+        title: 'Đăng ký thất bại',
+        icon: 'error',
+        showCancelButton: true,
+        cancelButtonText: 'Thử lại',
+        cancelButtonColor: '#d33',
+      });
+    }
+  };
+  
+  
   return (
     <>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-red-200 to-gray-900 relative overflow-hidden font-sans">
@@ -30,16 +85,18 @@ const Register = () => {
         </div>
         <form className="space-y-4 sm:space-y-6 md:space-y-8">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="account">
-                Account
+          <div>
+              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="email">
+                Email
               </label>
               <input
-                id="account"
-                type="text"
+                id="email"
+                type="email"
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                placeholder="Enter your account"
+                placeholder="Enter your email"
                 required
+                value={data.email}
+                onChange={(e) => setData({ ...data, email: e.target.value })}
               />
             </div>
             <div>
@@ -47,11 +104,13 @@ const Register = () => {
                 Full Name
               </label>
               <input
-                id="fullName"
+                id="fullname"
                 type="text"
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Enter your full name"
                 required
+                value={data.fullname}
+                onChange={(e) => setData({ ...data, fullname: e.target.value })}
               />
             </div>
             <div>
@@ -64,6 +123,8 @@ const Register = () => {
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Enter your password"
                 required
+                value={data.password}
+                onChange={(e) => setData({ ...data, password: e.target.value })}
               />
             </div>
             <div>
@@ -76,55 +137,8 @@ const Register = () => {
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Confirm your password"
                 required
-              />
-            </div>
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="dateOfBirth">
-                Date of Birth
-              </label>
-              <input
-                id="dateOfBirth"
-                type="date"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="gender">
-                Gender
-              </label>
-              <select
-                id="gender"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                required
-              >
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="identityCard">
-                Identity Card
-              </label>
-              <input
-                id="identityCard"
-                type="text"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                placeholder="Enter your identity card number"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="email">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-                placeholder="Enter your email"
-                required
+                value={data.confirmPassword}
+                onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
               />
             </div>
             <div className="sm:col-span-2">
@@ -137,24 +151,15 @@ const Register = () => {
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
                 placeholder="Enter your phone number"
                 required
+                value={data.phone}
+                onChange={(e) => setData({ ...data, phone: e.target.value })}
               />
             </div>
-          </div>
-          <div>
-            <label className="block text-red-700 font-semibold mb-2 font-sans" htmlFor="address">
-              Address
-            </label>
-            <textarea
-              id="address"
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-red-200 bg-white/70 text-gray-900 placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-300 transition shadow-sm"
-              placeholder="Enter your address"
-              rows="3"
-              required
-            ></textarea>
           </div>
           <button
             type="submit"
             className="w-full py-2 sm:py-3 mt-2 bg-gradient-to-r from-red-400 to-red-600 text-white font-bold rounded-lg shadow-md hover:scale-105 hover:from-red-500 hover:to-red-700 transition-all duration-200 border border-red-300 font-sans tracking-wide"
+            onClick={handleRegister}
           >
             Register
           </button>

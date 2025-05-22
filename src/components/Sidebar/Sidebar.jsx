@@ -1,7 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import accountAPI from '../../services/Account/accountAPI';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    await accountAPI.logout();
+    Swal.fire({
+      title: 'Đăng xuất thành công',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
+    navigate('/login');
+  };
+
   return (
     <aside className="h-screen w-64 bg-gradient-to-b from-red-700 to-gray-900 text-white flex flex-col shadow-lg fixed">
       <div className="flex items-center justify-center h-20 border-b border-red-900">
@@ -40,7 +54,7 @@ const Sidebar = () => {
         </Link>
       </nav>
       <div className="mt-auto p-4 border-t border-red-900">
-        <button className="w-full py-2 bg-red-800 rounded-lg hover:bg-red-600 transition font-semibold">
+        <button onClick={handleLogout} className="w-full py-2 bg-red-800 rounded-lg hover:bg-red-600 transition font-semibold">
           Đăng xuất
         </button>
       </div>
